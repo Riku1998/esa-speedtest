@@ -45,7 +45,7 @@ var settings = {
 	time_ulGraceTime: 3, //time to wait in seconds before actually measuring ul speed (wait for buffers to fill)
 	time_dlGraceTime: 1.5, //time to wait in seconds before actually measuring dl speed (wait for TCP window to increase)
 	count_ping: 10, // number of pings to perform in ping test
-	url_dl: "assets/garbage.bin", // path to a large static file, used for download test. must be relative to this js file
+	url_dl: "garbage.bin", // path to a large static file, used for download test. must be relative to this js file
 	url_ul: "backend/empty.php", // path to an empty file, used for upload test. must be relative to this js file
 	url_ping: "backend/empty.php", // path to an empty file, used for ping test. must be relative to this js file
 	url_getIp: "backend/getIP.php", // path to getIP.php relative to this js file, or a similar thing that outputs the client's ip
@@ -58,7 +58,7 @@ var settings = {
 	xhr_dlUseBlob: false, // if set to true, it reduces ram usage but uses the hard drive (useful with large garbagePhp_chunkSize and/or high xhr_dlMultistream)
 	xhr_ul_blob_megabytes: 20, //size in megabytes of the upload blobs sent in the upload test (forced to 4 on chrome mobile)
 	garbagePhp_chunkSize: 100, // size of chunks sent by garbage.php (can be different if enable_quirks is active)
-	dl_file_size_mb: 48, // total size in MiB of the static download file (assets/garbage.bin). must match the actual file
+	dl_file_size_mb: 48, // total size in MiB of the static download file (garbage.bin). must match the actual file
 	dl_range_mb: 8, // size in MiB of each HTTP Range request used by every download stream
 	enable_quirks: true, // enable quirks for specific browsers. currently it overrides settings to optimize for specific browsers, unless they are already being overridden with the start command
 	ping_allowPerformanceApi: true, // if enabled, the ping test will attempt to calculate the ping more precisely using the Performance API. Currently works perfectly in Chrome, badly in Edge, and not at all in Firefox. If Performance API is not supported or the result is obviously wrong, a fallback is provided.

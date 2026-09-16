@@ -1,0 +1,9 @@
+{
+  "name": "esa-speedtest",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static network speedtest site for Alibaba Cloud ESA Pages",
+  "scripts": {
+    "build": "echo static-site-no-build-needed"
+  }
+}

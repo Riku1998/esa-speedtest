@@ -31,7 +31,7 @@ edgeone pages deploy -n speedtest
 
 本 fork 改为**纯静态 + CDN 缓存下载**，链路为「用户 → 就近 CDN 节点 → 缓存测速文件」：
 
-- `assets/garbage.bin`：20 MiB 随机不可压缩数据，作为测速文件；
+- `assets/garbage.bin`：48 MiB 随机不可压缩数据，作为测速文件（48 MiB ÷ 8 MiB 段 = 6 段，正好配 6 线程 Range）；
 - 下载测试对**恒定 URL** 发起**多线程 Range 请求**（默认 6 线程、每段 8 MiB，按 Range 循环下载同一文件），URL 不带随机缓存破坏参数，保证每次请求都命中 CDN 边缘缓存；
 - 缓存配置：EdgeOne 版用 `edgeone.json`；阿里云 ESA 版在 ESA 控制台配置缓存规则（见上）；
 - 上传/延迟/抖动沿用 LibreSpeed 逻辑（上传测本地上行进度，不受服务端影响）。

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#101a3d"/>
+      <stop offset="0.55" stop-color="#1c1f4e"/>
+      <stop offset="1" stop-color="#33276b"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7df3ff"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="arc" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#bg)"/>
+  <rect x="2.5" y="2.5" width="59" height="59" rx="15.5" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="1"/>
+  <path d="M12 54 Q 26 46 40 50 T 52 44" fill="none" stroke="url(#arc)" stroke-width="4" stroke-linecap="round" opacity=".85"/>
+  <g transform="translate(32 28) scale(0.78) translate(-32 -32)">
+    <path d="M34.7 5.3 L8 37.3 H29.3 L29.3 58.7 L56 26.7 H32 Z" fill="url(#bolt)"/>
+  </g>
+</svg>

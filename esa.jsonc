@@ -1,0 +1,11 @@
+{
+  // 阿里云 ESA Pages 构建配置（官方 esa.jsonc 格式，仅管理构建与静态资源托管）
+  "name": "eo-speedtest-esa",
+  // 纯静态项目：跳过安装与构建
+  "installCommand": "",
+  "buildCommand": "",
+  "assets": {
+    // 静态资源位于仓库根目录
+    "directory": "./"
+  }
+}

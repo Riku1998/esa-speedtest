@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no" />
+<title>EdgeOne 网络测速</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<script type="text/javascript" src="speedtest.js"></script>
+<style type="text/css">
+	:root{
+		--bg-0:#0a0e1f; --bg-1:#141b3a;
+		--card:rgba(255,255,255,.055);
+		--card-border:rgba(255,255,255,.12);
+		--text:#f4f6ff; --text-dim:rgba(235,240,255,.55);
+		--dl:#22d3ee; --ul:#a78bfa; --ping:#34d399; --jit:#fbbf24;
+		--ok:#34d399; --warn:#fbbf24; --bad:#f87171;
+		--btn-grad:linear-gradient(135deg,#22d3ee 0%,#6366f1 55%,#a78bfa 100%);
+		--btn-run:linear-gradient(135deg,#f43f5e 0%,#e11d48 100%);
+	}
+	*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+	html,body{margin:0;padding:0;}
+	body{
+		min-height:100vh;
+		background:radial-gradient(1200px 700px at 15% -10%,#1b2a5e 0%,transparent 55%),
+		           radial-gradient(1000px 600px at 110% 20%,#3b1d5e 0%,transparent 55%),
+		           linear-gradient(160deg,var(--bg-0) 0%,var(--bg-1) 100%);
+		color:var(--text);
+		font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+		text-align:center;
+		position:relative;
+		overflow-x:hidden;
+		display:flex;
+		flex-direction:column;
+		align-items:center;
+	}
+	/* 漂浮光晕 */
+	body::before,body::after{
+		content:"";position:fixed;border-radius:50%;filter:blur(90px);opacity:.5;z-index:0;pointer-events:none;
+	}
+	body::before{width:420px;height:420px;background:#22d3ee;top:-120px;left:-100px;animation:drift 14s ease-in-out infinite alternate;}
+	body::after{width:380px;height:380px;background:#a78bfa;bottom:-100px;right:-80px;animation:drift 18s ease-in-out infinite alternate-reverse;}
+	@keyframes drift{from{transform:translate(0,0) scale(1);}to{transform:translate(60px,40px) scale(1.15);}}
+
+	.container{position:relative;z-index:1;width:100%;max-width:960px;padding:2.2em 1em 1.6em;}
+
+	header h1{
+		margin:0;font-size:clamp(1.7em,4.5vw,2.4em);font-weight:800;letter-spacing:.02em;
+		background:linear-gradient(90deg,#7dd3fc,#c4b5fd 60%,#f0abfc);
+		-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+	}
+	header .sub{margin:.5em 0 0;color:var(--text-dim);font-size:.95em;}
+
+	#status{
+		margin:1.2em auto .9em;min-height:1.6em;font-size:1em;color:var(--text-dim);
+		transition:color .3s;
+	}
+	#status.live{color:#7dd3fc;}
+
+	/* 开始按钮 */
+	#startStopBtn{
+		display:inline-block;border:none;cursor:pointer;color:#fff;
+		background:var(--btn-grad);background-size:150% 150%;
+		border-radius:999px;padding:0 2.6em;height:3.4em;line-height:3.4em;
+		font-size:1.05em;font-weight:700;letter-spacing:.08em;
+		box-shadow:0 10px 34px rgba(99,102,241,.45);
+		transition:transform .25s,box-shadow .25s,background .3s;
+	}
+	#startStopBtn:hover{transform:translateY(-2px);box-shadow:0 14px 44px rgba(99,102,241,.6);}
+	#startStopBtn:active{transform:translateY(0);}
+	#startStopBtn.running{
+		background:var(--btn-run);box-shadow:0 10px 34px rgba(225,29,72,.45);
+		animation:pulse 1.8s ease-in-out infinite;
+	}
+	@keyframes pulse{0%,100%{box-shadow:0 10px 30px rgba(225,29,72,.35);}50%{box-shadow:0 14px 46px rgba(225,29,72,.65);}}
+	#startStopBtn:before{content:"开始测试";}
+	#startStopBtn.running:before{content:"中止测试";}
+
+	/* 指标卡片 */
+	.grid{
+		margin:2em auto 1.4em;
+		display:grid;gap:1em;
+		grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+		max-width:860px;
+	}
+	.card{
+		position:relative;background:var(--card);
+		border:1px solid var(--card-border);border-radius:22px;
+		padding:1.5em 1em 1.3em;
+		backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+		box-shadow:0 8px 30px rgba(0,0,0,.22);
+		transition:transform .3s,border-color .3s;
+		overflow:hidden;
+	}
+	.card:hover{transform:translateY(-4px);border-color:rgba(255,255,255,.28);}
+	.card .glow{position:absolute;top:-46px;right:-46px;width:110px;height:110px;border-radius:50%;opacity:.22;filter:blur(30px);pointer-events:none;}
+	.card-name{display:flex;align-items:center;justify-content:center;gap:.45em;font-size:.92em;font-weight:600;color:var(--text-dim);letter-spacing:.12em;}
+	.card-name i{width:8px;height:8px;border-radius:50%;display:inline-block;}
+	.value{
+		margin:.45em 0 .05em;font-size:clamp(2.4em,6vw,3.2em);font-weight:800;
+		font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.15;
+	}
+	.value.placeholder{color:rgba(235,240,255,.28);}
+	.unit{font-size:.85em;color:var(--text-dim);}
+	.bar{height:5px;border-radius:3px;background:rgba(255,255,255,.1);margin-top:1em;overflow:hidden;}
+	.bar i{display:block;height:100%;width:0;border-radius:3px;transition:width .3s ease;}
+	.progress-hint{margin-top:.6em;font-size:.72em;color:var(--text-dim);min-height:1.1em;}
+
+	footer{color:var(--text-dim);font-size:.82em;line-height:2;padding-bottom:.6em;}
+	footer a{color:rgba(235,240,255,.65);text-decoration:none;margin:0 .4em;transition:color .25s;}
+	footer a:hover{color:#fff;}
+	footer .note{display:block;margin-top:.4em;font-size:.78em;opacity:.75;}
+
+	@media (max-width:520px){
+		.container{padding:1.6em .7em 1.2em;}
+		.card{padding:1.2em .8em 1.1em;}
+	}
+</style>
+</head>
+<body>
+<div class="container">
+	<header>
+		<h1>⚡ 网络测速</h1>
+		<p class="sub">EdgeOne CDN 加速 · 下载 / 上传 / 延迟 / 抖动</p>
+	</header>
+
+	<div id="status">点击下方按钮开始测速</div>
+	<button id="startStopBtn" onclick="startStop()"></button>
+
+	<div class="grid">
+		<div class="card">
+			<span class="glow" style="background:var(--dl);"></span>
+			<div class="card-name"><i style="background:var(--dl);"></i>下载</div>
+			<div id="dlText" class="value placeholder">--</div>
+			<div class="unit">Mbit/s</div>
+			<div class="bar"><i id="dlBar" style="background:var(--dl);"></i></div>
+			<div class="progress-hint" id="dlHint">多线程并发 · 缓存命中</div>
+		</div>
+		<div class="card">
+			<span class="glow" style="background:var(--ul);"></span>
+			<div class="card-name"><i style="background:var(--ul);"></i>上传</div>
+			<div id="ulText" class="value placeholder">--</div>
+			<div class="unit">Mbit/s</div>
+			<div class="bar"><i id="ulBar" style="background:var(--ul);"></i></div>
+			<div class="progress-hint" id="ulHint"></div>
+		</div>
+		<div class="card">
+			<span class="glow" style="background:var(--ping);"></span>
+			<div class="card-name"><i style="background:var(--ping);"></i>延迟 Ping</div>
+			<div id="pingText" class="value placeholder">--</div>
+			<div class="unit">ms</div>
+			<div class="bar"><i id="pingBar" style="background:var(--ping);"></i></div>
+			<div class="progress-hint" id="pingHint"></div>
+		</div>
+		<div class="card">
+			<span class="glow" style="background:var(--jit);"></span>
+			<div class="card-name"><i style="background:var(--jit);"></i>抖动 Jitter</div>
+			<div id="jitText" class="value placeholder">--</div>
+			<div class="unit">ms</div>
+			<div class="bar"><i id="jitBar" style="background:var(--jit);"></i></div>
+			<div class="progress-hint" id="jitHint"></div>
+		</div>
+	</div>
+
+	<footer>
+		<a href="https://github.com/Riku1998/eo-speedtest">GitHub</a>
+		·
+		<a href="https://github.com/Zinc23333/eo-speedtest">上游项目</a>
+		·
+		<a href="https://github.com/librespeed/speedtest">LibreSpeed</a>
+		<span class="note">由 EdgeOne Pages 静态托管，测速文件经全国 CDN 节点缓存 · 重新部署后首次测速为缓存预热，数值可能略低</span>
+	</footer>
+</div>
+
+<script type="text/javascript">
+var s = new Speedtest();
+
+function I(id){return document.getElementById(id);}
+
+function speedColor(v){ // 速度越高越好
+	if(v>=100)return "var(--ok)";
+	if(v>=50)return "#a3e635";
+	if(v>=25)return "var(--warn)";
+	if(v>=10)return "#fb923c";
+	return "var(--bad)";
+}
+function pingColor(v){ // 延迟越低越好
+	if(v<=20)return "var(--ok)";
+	if(v<=50)return "#a3e635";
+	if(v<=100)return "var(--warn)";
+	if(v<=200)return "#fb923c";
+	return "var(--bad)";
+}
+function jitColor(v){
+	if(v<=5)return "var(--ok)";
+	if(v<=10)return "#a3e635";
+	if(v<=20)return "var(--warn)";
+	if(v<=40)return "#fb923c";
+	return "var(--bad)";
+}
+
+s.onupdate=function(data){
+	var st=data.testState;
+	if(st===0){I("status").textContent="正在启动…";I("status").className="live";}
+	else if(st===1){I("status").textContent="下载测速中…";I("status").className="live";}
+	else if(st===2){I("status").textContent="延迟与抖动测速中…";I("status").className="live";}
+	else if(st===3){I("status").textContent="上传测速中…";I("status").className="live";}
+	else if(st===4){I("status").textContent="测试完成";I("status").className="";}
+	else if(st===5){I("status").textContent="测试已中止";I("status").className="";}
+
+	var dl=parseFloat(data.dlStatus),ul=parseFloat(data.ulStatus);
+	var ping=parseFloat(data.pingStatus),jit=parseFloat(data.jitterStatus);
+
+	// 下载
+	if(st===1&&(data.dlStatus==="0"||data.dlStatus==="")){I("dlText").textContent="…";I("dlText").style.color="var(--text-dim)";}
+	else if(data.dlStatus==="Fail"){I("dlText").textContent="失败";I("dlText").style.color="var(--bad)";}
+	else if(!isNaN(dl)){I("dlText").textContent=data.dlStatus;I("dlText").style.color=speedColor(dl);I("dlText").classList.remove("placeholder");}
+	I("dlBar").style.width=(data.dlProgress*100)+"%";
+
+	// 上传
+	if(st===3&&(data.ulStatus==="0"||data.ulStatus==="")){I("ulText").textContent="…";I("ulText").style.color="var(--text-dim)";}
+	else if(data.ulStatus==="Fail"){I("ulText").textContent="失败";I("ulText").style.color="var(--bad)";}
+	else if(!isNaN(ul)){I("ulText").textContent=data.ulStatus;I("ulText").style.color=speedColor(ul);I("ulText").classList.remove("placeholder");}
+	I("ulBar").style.width=(data.ulProgress*100)+"%";
+
+	// 延迟
+	if(data.pingStatus==="Fail"){I("pingText").textContent="失败";I("pingText").style.color="var(--bad)";}
+	else if(!isNaN(ping)){I("pingText").textContent=data.pingStatus;I("pingText").style.color=pingColor(ping);I("pingText").classList.remove("placeholder");}
+	I("pingBar").style.width=(data.pingProgress*100)+"%";
+
+	// 抖动
+	if(data.jitterStatus==="Fail"){I("jitText").textContent="失败";I("jitText").style.color="var(--bad)";}
+	else if(!isNaN(jit)){I("jitText").textContent=data.jitterStatus;I("jitText").style.color=jitColor(jit);I("jitText").classList.remove("placeholder");}
+	I("jitBar").style.width=(data.pingProgress*100)+"%";
+};
+
+s.onend=function(aborted){
+	I("startStopBtn").className="";
+	if(aborted){initUI();I("status").textContent="测试已中止";}
+	else{I("status").textContent="测试完成";}
+};
+
+function startStop(){
+	if(s.getState()===3){
+		s.abort();
+		I("startStopBtn").className="";
+		I("startStopBtn").disabled=true;
+		I("status").textContent="正在中止…";
+	}else{
+		s.start();
+		I("startStopBtn").className="running";
+		I("startStopBtn").disabled=false;
+		I("status").textContent="正在启动…";
+	}
+}
+
+function initUI(){
+	I("dlText").textContent="--";I("dlText").style.color="";I("dlText").className="value placeholder";
+	I("ulText").textContent="--";I("ulText").style.color="";I("ulText").className="value placeholder";
+	I("pingText").textContent="--";I("pingText").style.color="";I("pingText").className="value placeholder";
+	I("jitText").textContent="--";I("jitText").style.color="";I("jitText").className="value placeholder";
+	I("dlBar").style.width="0%";I("ulBar").style.width="0%";I("pingBar").style.width="0%";I("jitBar").style.width="0%";
+	I("startStopBtn").disabled=false;
+	I("status").textContent="点击下方按钮开始测速";I("status").className="";
+}
+initUI();
+</script>
+</body>
+</html>

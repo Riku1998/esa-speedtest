@@ -1,4 +1,4 @@
-# esa-speedtest
+# ESA-Speedtest
 
 一个基于 [LibreSpeed](https://github.com/librespeed/speedtest) 的网页版网络速度测试工具，部署于阿里云 ESA Pages，用于测试网络的下载速度、上传速度、延迟和抖动。
 
